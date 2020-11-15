@@ -13,7 +13,7 @@ const TOKEN_PATH = "token.json";
 // Load client secrets from a local file.
 fs.readFile("credentials.json", (err, content) => {
   if (err) return console.log("Error loading client secret file:", err);
-  // Authorize a client with credentials, then call the Gmail API.
+  // Authorize a client with credentials, then call the Gmail API. // call the function here
   authorize(JSON.parse(content), getRecentEmail);
 });
 
@@ -79,59 +79,54 @@ function getNewToken(oAuth2Client, callback) {
 function getRecentEmail(auth) {
   const gmail = google.gmail({ version: "v1", auth });
   // obtener solo los emails recientes con este parametro - 'maxResults'
-  gmail.users.messages.list({
-    auth: auth,
-    userId: 'me',
-    }, function(err, response) {
+  gmail.users.messages.list(
+    {
+      auth: auth,
+      userId: "me",
+    },
+    function (err, response) {
       if (err) {
-          console.log('The API returned an error: ' + err);
-          return;
+        console.log("The API returned an error: " + err);
+        return;
       }
-    // con este id obtenemos el primero mensaje (el mas reciente) QUE ESTE EN UNREAD
-    var message_id = response['data']['messages'][0]['id'];
+      // con este id obtenemos el primero mensaje (el mas reciente) QUE ESTE EN UNREAD
+      var message_id = response["data"]["messages"][0]["id"];
 
-    //mostrar el id del primer mensaje
-    // console.log(message_id);
+      //mostrar el id del primer mensaje
+      // console.log(message_id);
 
-    // obtener el mensaje con el id que ya tenemos
-      gmail.users.messages.get({
-        auth: auth,
-        userId: "me",
-        'id': message_id,
-        format: 'FULL'
-      }, function (err, response){
-        if(err){
-          console.log("ha ocurrido un error obteniendo el mensaje actual");
-          return;
+      // obtener el mensaje con el id que ya tenemos
+      gmail.users.messages.get(
+        {
+          auth: auth,
+          userId: "me",
+          id: message_id,
+          format: "FULL",
+        },
+        function (err, response) {
+          if (err) {
+            console.log("ha ocurrido un error obteniendo el mensaje actual");
+            return;
+          }
+          // imprimimos la data del mensaje seleccionado
+          console.log(response["data"]);
+
+          //Accedemos al contenido del email que esta codificado en base64
+          message_raw = response.data.payload.parts[0].body.data;
+
+          //Mostrar el mensaje codeado en base64
+          // console.log(message_raw);
+
+          // Luego hay que decodear el mensaje que esta en base 64
+          data = message_raw;
+          const buff = Buffer.from(data, "base64");
+          text = buff.toString();
+          console.log(text);
         }
-        // imprimimos la data del mensaje seleccionado
-        console.log(response['data']);
-
-        //Accedemos al contenido del email que esta codificado en base64
-        message_raw = response.data.payload.parts[0].body.data;
-        
-        //Mostrar el mensaje codeado en base64
-        // console.log(message_raw);
-
-        // Luego hay que decodear el mensaje que esta en base 64
-        data = message_raw;
-        const buff = Buffer.from(data, 'base64')
-        text = buff.toString();
-        console.log(text);
-      });
-  });
+      );
+    }
+  );
 }
-
-
-
-
-
-
-
-
-
-
-
 
 // function listLabels(auth) {
 //   const gmail = google.gmail({ version: "v1", auth });
@@ -148,4 +143,3 @@ function getRecentEmail(auth) {
 //     }
 //   );
 // }
-
